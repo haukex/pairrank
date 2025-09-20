@@ -1,0 +1,115 @@
+/** Main Stylesheet
+ *
+ * Copyright © 2025 Hauke D (haukex@zero-g.net)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+// https://simplecss.org/demo https://test.simplecss.org/ https://github.com/kevquirk/simple.css/wiki/Utility-elements-and-classes
+@import '../node_modules/simpledotcss/simple.css';
+
+// Plus a few tweaks to reduce some of the space (margins/padding/font), esp. for mobile
+body { grid-template-columns: 1fr min(80rem, 90%) 1fr }
+body > header { padding-bottom: 0.5rem }
+body > header > :only-child { margin-block-start: 1rem }
+body > header h1 { margin: 0.5rem auto }
+@media only screen and (max-width: 720px) {  // same condition as simple.css uses
+  :root { font-size: calc(100%/1.15) }
+  body { grid-template-columns: 1fr 98% 1fr }
+  body > header { padding-bottom: 0.3rem }
+  body > header > :only-child { margin-block-start: 0.7rem }
+}
+
+// borrow a a bit from Bootstrap https://github.com/twbs/bootstrap/blob/main/dist/css/bootstrap.css
+:root {
+  --bs-primary-bg-subtle: #cfe2ff;
+  --bs-primary-border-subtle: #9ec5fe;
+  --bs-primary-text-emphasis: #052c65;
+
+  --bs-success-bg-subtle: #d1e7dd;
+  --bs-success-border-subtle: #a3cfbb;
+  --bs-success-text-emphasis: #0a3622;
+
+  --bs-danger-bg-subtle: #f8d7da;
+  --bs-danger-border-subtle: #f1aeb5;
+  --bs-danger-text-emphasis: #58151c;
+
+  --bs-warning-bg-subtle: #fff3cd;
+  --bs-warning-border-subtle: #ffe69c;
+  --bs-warning-text-emphasis: #664d03;
+
+  --bs-info-bg-subtle: #cff4fc;
+  --bs-info-border-subtle: #9eeaf9;
+  --bs-info-text-emphasis: #055160;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bs-primary-bg-subtle: #031633;
+    --bs-primary-border-subtle: #084298;
+    --bs-primary-text-emphasis: #6ea8fe;
+
+    --bs-success-bg-subtle: #051b11;
+    --bs-success-border-subtle: #0f5132;
+    --bs-success-text-emphasis: #75b798;
+
+    --bs-danger-bg-subtle: #2c0b0e;
+    --bs-danger-border-subtle: #842029;
+    --bs-danger-text-emphasis: #ea868f;
+
+    --bs-warning-bg-subtle: #332701;
+    --bs-warning-border-subtle: #ffe69c;
+    --bs-warning-text-emphasis: #ffda6a;
+
+    --bs-info-bg-subtle: #032830;
+    --bs-info-border-subtle: #087990;
+    --bs-info-text-emphasis: #6edff6;
+  }
+}
+.text-nowrap { white-space: nowrap; }
+.d-none { display: none !important }
+
+// custom styles
+.primary {
+  color: var(--bs-primary-text-emphasis);
+  background-color: var(--bs-primary-bg-subtle);
+  border-color: var(--bs-primary-border-subtle);
+}
+.success {
+  color: var(--bs-success-text-emphasis);
+  background-color: var(--bs-success-bg-subtle);
+  border-color: var(--bs-success-border-subtle);
+}
+.danger {
+  color: var(--bs-danger-text-emphasis);
+  background-color: var(--bs-danger-bg-subtle);
+  border-color: var(--bs-danger-border-subtle);
+}
+.warning {
+  color: var(--bs-warning-text-emphasis);
+  background-color: var(--bs-warning-bg-subtle);
+  border-color: var(--bs-warning-border-subtle);
+}
+.info {
+  color: var(--bs-info-text-emphasis);
+  background-color: var(--bs-info-bg-subtle);
+  border-color: var(--bs-info-border-subtle);
+}
+
+// custom elements
+header {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}

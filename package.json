@@ -1,0 +1,39 @@
+{
+  "name": "pairrank",
+  "displayName": "PairRank",
+  "version": "0.1.0-beta",
+  "description": "Pairwise Ranking",
+  "author": {
+    "name": "Hauke D",
+    "email": "haukex@zero-g.net"
+  },
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "source": "src/index.html",
+  "browserslist": "defaults",
+  "_comment": "NOTE naming the test script `test` apparently always causes the VSCode test runner to use that",
+  "scripts": {
+    "clean": "git clean -dxf -e node_modules",
+    "lint": "tsc --noEmit && eslint",
+    "build": "npm run clean && npm run lint && parcel build",
+    "all-test": "npm run build && playwright test",
+    "start": "npm run clean && parcel --port 1234"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@parcel/transformer-sass": "^2.16.0",
+    "@parcel/transformer-typescript-tsc": "^2.16.0",
+    "@playwright/test": "^1.55.0",
+    "@stylistic/eslint-plugin": "^5.4.0",
+    "@types/node": "^24.5.2",
+    "@types/webpack-env": "^1.18.8",
+    "eslint": "^9.36.0",
+    "parcel": "^2.16.0",
+    "serve": "^14.2.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.0"
+  },
+  "dependencies": {
+    "simpledotcss": "^2.3.7"
+  }
+}
