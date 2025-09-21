@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import { test, expect } from '@playwright/test'
 import { normalizeScores, findTieGroups, Comparator, compareAllSort, breakTies } from '../algorithm'
+import { failComp, makeCustomComp, makeSimpleComp } from './test-utils'
+import { test, expect } from '@playwright/test'
 
 test('normalizeScores', async () => {
   // function doesn't care about the strings, and sorts the array in place, so make a quick helper:
@@ -65,49 +66,10 @@ test('scoreGroups', async () => {
   ]) ).toStrictEqual([[1,3],[4,7],[7,10]])
 })
 
-function makeSimpleComp(items :string[]) :Comparator {
-  return ([a,b]) => Promise.resolve( items.indexOf(a) > items.indexOf(b) ? 0 : 1 )
-}
-
-test('makeSimpleComp', async () => {
-  const comp = makeSimpleComp(['A','B','C'])
-  expect( await comp(['A','B']) ).toStrictEqual(1)
-  expect( await comp(['A','C']) ).toStrictEqual(1)
-  expect( await comp(['B','A']) ).toStrictEqual(0)
-  expect( await comp(['B','C']) ).toStrictEqual(1)
-  expect( await comp(['C','A']) ).toStrictEqual(0)
-  expect( await comp(['C','B']) ).toStrictEqual(0)
-})
-
-function makeCustomComp(items :Record<string, 0|1>) :Comparator {
-  const m = new Map(Object.entries(items))
-  return ab => {
-    const swap = ab[0] > ab[1]
-    const k = swap ? ab[1]+'\0'+ab[0] : ab[0]+'\0'+ab[1]
-    const r = m.get(k)
-    if (r!=undefined)
-      return Promise.resolve(swap ? (r ? 0 : 1) : r)
-    throw new Error(`Unhandled comparison a=${ab[0]} b=${ab[1]}`)
-  }
-}
-
-test('makeCustomComp', async () => {
-  const comp = makeCustomComp({'A\0B':0,'A\0C':1,'B\0C':0})
-  // Alice beats Bob
-  expect( await comp(['A','B']) ).toStrictEqual(0)
-  expect( await comp(['B','A']) ).toStrictEqual(1)
-  // Carol beats Alice
-  expect( await comp(['A','C']) ).toStrictEqual(1)
-  expect( await comp(['C','A']) ).toStrictEqual(0)
-  // Bob beats Carol
-  expect( await comp(['B','C']) ).toStrictEqual(0)
-  expect( await comp(['C','B']) ).toStrictEqual(1)
-})
-
 test('compareAllSort', async () => {
   // simple sort
-  let callCount = 0
   const baseComp = makeSimpleComp(['A','B','C','D'])
+  let callCount = 0
   const comp :Comparator = ab => { callCount++; return baseComp(ab) }
   expect( await compareAllSort([], comp) ).toStrictEqual([])
   expect( callCount ).toStrictEqual(0)
@@ -126,8 +88,9 @@ test('compareAllSort', async () => {
   expect( callCount ).toStrictEqual(20)
 
   // three-way tie
-  callCount = 0
+  // Alice beats Bob, Carol beats Alice, Bob beats Carol
   const baseCompTie = makeCustomComp({'A\0B':0,'A\0C':1,'B\0C':0})
+  callCount = 0
   const compTie :Comparator = ab => { callCount++; return baseCompTie(ab) }
   expect( await compareAllSort(['C','A','B'], compTie) )
     .toStrictEqual([ ['A',0], ['B',0], ['C',0] ])
@@ -143,13 +106,11 @@ test('compareAllSort', async () => {
   expect( callCount ).toStrictEqual(12)
 })
 
-const compFail :Comparator = _ab => { throw new Error('I shouldn\'t be called in this test') }
-
 test('breakTies', async () => {
-  expect( await breakTies([], compFail) ).toStrictEqual([])
-  expect( await breakTies([['A',1]], compFail) ).toStrictEqual([['A',1]])
-  expect( await breakTies([['A',1],['B',2]], compFail) ).toStrictEqual([['A',1],['B',2]])
-  expect( await breakTies([['A',1],['B',2],['C',3]], compFail) ).toStrictEqual([['A',1],['B',2],['C',3]])
+  expect( await breakTies([], failComp) ).toStrictEqual([])
+  expect( await breakTies([['A',1]], failComp) ).toStrictEqual([['A',1]])
+  expect( await breakTies([['A',1],['B',2]], failComp) ).toStrictEqual([['A',1],['B',2]])
+  expect( await breakTies([['A',1],['B',2],['C',3]], failComp) ).toStrictEqual([['A',1],['B',2],['C',3]])
 
   const comp = makeSimpleComp(['G','F','E','D','C','B','A'])
   expect( await breakTies([['A',5],['B',5]], comp) ).toStrictEqual([['B',0],['A',1]])

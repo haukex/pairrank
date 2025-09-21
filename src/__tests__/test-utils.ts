@@ -1,4 +1,4 @@
-/** Tests for Ford-Johnson Algorithm
+/** Utilities for Tests
  *
  * Copyright © 2025 Hauke D (haukex@zero-g.net)
  *
@@ -15,15 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import { mergeInsertionSort } from '../ford-johnson'
-import { test, expect } from '@playwright/test'
-import { permutations } from '../utils'
+import { Comparator } from '../algorithm'
 
-test('mergeInsertionSort', async () => {
-  // 6! = 720, 7! = 5040 - already takes a fair amount of time, so don't increase this!
-  for(let listLength=0; listLength<7; listLength++) {
-    const array :Readonly<string[]> = Array.from({ length: listLength }, (_, i) => String.fromCharCode(65 + i))
-    for (const perm of permutations(array))
-      expect( await mergeInsertionSort(perm, ([a,b]) => Promise.resolve(a>b?0:1)) ).toStrictEqual(array)
+export const failComp :Comparator = _ab => { throw new Error('I shouldn\'t be called in this test') }
+
+export function makeSimpleComp(items :string[]) :Comparator {
+  return ([a,b]) => Promise.resolve( items.indexOf(a) > items.indexOf(b) ? 0 : 1 )
+}
+
+export function makeCustomComp(items :Record<string, 0|1>) :Comparator {
+  const m = new Map(Object.entries(items))
+  return ab => {
+    const swap = ab[0] > ab[1]
+    const k = swap ? ab[1]+'\0'+ab[0] : ab[0]+'\0'+ab[1]
+    const r = m.get(k)
+    if (r!=undefined)
+      return Promise.resolve(swap ? (r ? 0 : 1) : r)
+    throw new Error(`Unhandled comparison a=${ab[0]} b=${ab[1]}`)
   }
-})
+}
