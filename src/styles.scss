@@ -24,11 +24,17 @@ body { grid-template-columns: 1fr min(80rem, 90%) 1fr }
 body > header { padding-bottom: 0.5rem }
 body > header > :only-child { margin-block-start: 1rem }
 body > header h1 { margin: 0.5rem auto }
+h1 { font-size: 2.0rem }
+h2 { font-size: 1.8rem }
+h3 { font-size: 1.4rem }
 @media only screen and (max-width: 720px) {  // same condition as simple.css uses
   :root { font-size: calc(100%/1.15) }
   body { grid-template-columns: 1fr 98% 1fr }
   body > header { padding-bottom: 0.3rem }
   body > header > :only-child { margin-block-start: 0.7rem }
+  h1 { font-size: 1.6rem }
+  h2 { font-size: 1.4rem }
+  h3 { font-size: 1.2rem }
 }
 
 // borrow a a bit from Bootstrap https://github.com/twbs/bootstrap/blob/main/dist/css/bootstrap.css
@@ -106,10 +112,77 @@ body > header h1 { margin: 0.5rem auto }
   border-color: var(--bs-info-border-subtle);
 }
 
+.notice-narrow {
+  margin: 0.5rem 0;
+  padding: 1rem;
+}
+button {
+  padding: 0.5rem 1rem;
+}
+
 // custom elements
 header {
   position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: 1000;
+}
+
+.choices {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+@media only screen and (max-width: 720px) {
+  .choices {
+    flex-direction: column;
+  }
+}
+.choices > .choice {
+  min-height: 35vh;
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 1rem;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+.choices > .choice.is-chosen {
+  min-height: auto;
+  background-color: var(--bs-success-bg-subtle);
+  border-color: var(--bs-success-border-subtle);
+  color: var(--text);
+  cursor: not-allowed;
+}
+.choices > .choice.not-chosen {
+  min-height: auto;
+  background-color: var(--bs-danger-bg-subtle);
+  border-color: var(--bs-danger-border-subtle);
+  color: var(--text);
+  cursor: not-allowed;
+}
+.make-choice.chosen h3 {
+  display: none;
+}
+
+.results-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.results-title h2 {
+  flex-grow: 1;
+}
+.copy-results {
+  font-size: 1rem;;
+}
+ol.results-list > li:first-child {
+  font-weight: bold;
+}
+
+.break-ties {
+  display: flex;
+  gap: 1em;
+  align-items: baseline;
+  flex-wrap: wrap;
 }

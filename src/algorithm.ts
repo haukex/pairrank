@@ -21,8 +21,11 @@ import { assert, paranoia } from './utils'
 export type RankedResults = [item: string, score: number][]
 
 /** Sort the given results **in-place**, first by score, second by string. */
-export function sortResults(results :RankedResults) {
-  results.sort(([a1, a2], [b1, b2]) => a2 - b2 || a1.localeCompare(b1))
+export function sortResults(results :RankedResults, order :'asc'|'desc' = 'asc') {
+  if (order==='asc')
+    results.sort(([a1, a2], [b1, b2]) => a2 - b2 || a1.localeCompare(b1))
+  else
+    results.sort(([a1, a2], [b1, b2]) => b2 - a2 || a1.localeCompare(b1))
 }
 
 /** Normalize the scores **in-place** so they start at zero and there are no gaps; ties are kept.

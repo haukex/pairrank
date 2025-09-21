@@ -52,6 +52,7 @@ export default defineConfig({
     '@typescript-eslint/no-confusing-void-expression': [ 'error', { 'ignoreArrowShorthand': true } ],
     '@typescript-eslint/restrict-template-expressions': [ 'warn', { 'allowNumber': true, 'allowBoolean': true } ],
     '@typescript-eslint/no-misused-promises': [ 'error', { 'checksVoidReturn': false } ],
+    '@typescript-eslint/no-unnecessary-condition': [ 'error', { 'allowConstantLoopConditions': 'only-allowed-literals' } ],
     '@typescript-eslint/require-await': 'off',
     'prefer-promise-reject-errors': 'off',
     '@typescript-eslint/prefer-promise-reject-errors': 'off',

@@ -20,5 +20,5 @@ import { test, expect } from '@playwright/test'
 test('smoke test', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveTitle(/PairRank/)
-  await expect( page.getByText('Hello, World!') ).toBeVisible()  // JS-generated content
+  await expect( page.getByText('Compare what?') ).toBeVisible()  // JS-generated content
 })
