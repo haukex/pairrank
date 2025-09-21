@@ -1,5 +1,5 @@
 /** This file is a mostly AI-GENERATED implementation of the Merge-insertion sort AKA the Ford-Johnson algorithm.
- * I haven't *yet* checked in detail whether this code faithfully implements the algorithm;
+ * I haven't *yet* checked in detail whether this code faithfully implements the algorithm (*Update:* no! - TODO);
  * though I have written tests by hand to check that the sorting results are correct.
  *
  * This algorithm is the one with the lowest number of comparisons (=user prompts) for our case:
