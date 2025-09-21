@@ -106,27 +106,41 @@ test('makeCustomComp', async () => {
 
 test('compareAllSort', async () => {
   // simple sort
-  const comp = makeSimpleComp(['A','B','C','D'])
+  let callCount = 0
+  const baseComp = makeSimpleComp(['A','B','C','D'])
+  const comp :Comparator = ab => { callCount++; return baseComp(ab) }
   expect( await compareAllSort([], comp) ).toStrictEqual([])
+  expect( callCount ).toStrictEqual(0)
   expect( await compareAllSort(['B','A'], comp) ).toStrictEqual([ ['A',0], ['B',1] ])
+  expect( callCount ).toStrictEqual(1)
   expect( await compareAllSort(['A','B'], comp) ).toStrictEqual([ ['A',0], ['B',1] ])
+  expect( callCount ).toStrictEqual(2)
   expect( await compareAllSort(['C','D','B','A'], comp) )
     .toStrictEqual([ ['A',0], ['B',1], ['C',2], ['D',3] ])
+  expect( callCount ).toStrictEqual(8)  // n!/(k!*(n-k)!) = 6
   expect( await compareAllSort(['A','B','C','D'], comp) )
     .toStrictEqual([ ['A',0], ['B',1], ['C',2], ['D',3] ])
+  expect( callCount ).toStrictEqual(14)
   expect( await compareAllSort(['D','C','B','A'], comp) )
     .toStrictEqual([ ['A',0], ['B',1], ['C',2], ['D',3] ])
+  expect( callCount ).toStrictEqual(20)
 
   // three-way tie
-  const compTie = makeCustomComp({'A\0B':0,'A\0C':1,'B\0C':0})
+  callCount = 0
+  const baseCompTie = makeCustomComp({'A\0B':0,'A\0C':1,'B\0C':0})
+  const compTie :Comparator = ab => { callCount++; return baseCompTie(ab) }
   expect( await compareAllSort(['C','A','B'], compTie) )
     .toStrictEqual([ ['A',0], ['B',0], ['C',0] ])
+  expect( callCount ).toStrictEqual(3)  // n!/(k!*(n-k)!) = 3
   expect( await compareAllSort(['B','C','A'], compTie) )
     .toStrictEqual([ ['A',0], ['B',0], ['C',0] ])
+  expect( callCount ).toStrictEqual(6)
   expect( await compareAllSort(['A','B','C'], compTie) )
     .toStrictEqual([ ['A',0], ['B',0], ['C',0] ])
+  expect( callCount ).toStrictEqual(9)
   expect( await compareAllSort(['C','B','A'], compTie) )
     .toStrictEqual([ ['A',0], ['B',0], ['C',0] ])
+  expect( callCount ).toStrictEqual(12)
 })
 
 const compFail :Comparator = _ab => { throw new Error('I shouldn\'t be called in this test') }
@@ -142,8 +156,11 @@ test('breakTies', async () => {
   expect( await breakTies([['A',5],['B',5],['C',5]], comp) ).toStrictEqual([['C',0],['B',1],['A',2]])
   expect( await breakTies([['X',0],['A',1],['B',1],['C',1],['Y',2]], comp) ).toStrictEqual([['X',0],['C',1],['B',2],['A',3],['Y',4]])
   expect( await breakTies([['X',3],['A',5],['B',5],['C',5],['Y',10]], comp) ).toStrictEqual([['X',3],['C',4],['B',5],['A',6],['Y',7]])
-  expect( await breakTies([['A',0],['B',0],['X',1],['Y',2],['C',3],['D',3]], comp) )
+  let callCount = 0
+  const wrapComp :Comparator = ab => { callCount++; return comp(ab) }
+  expect( await breakTies([['A',0],['B',0],['X',1],['Y',2],['C',3],['D',3]], wrapComp) )
     .toStrictEqual([ ['B',0],['A',1],['X',2],['Y',3],['D',4],['C',5] ])
+  expect( callCount ).toStrictEqual(2)
   /* The following scores may seem strange at first, but the reason is the delta between X and Y's scores in the input.
    * These kinds of scores are not expected anyway, since the functions in this module always normalize them.
    * These scores are basically just helper values for sorting and identifying ties! */
