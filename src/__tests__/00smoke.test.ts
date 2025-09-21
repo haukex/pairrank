@@ -22,3 +22,5 @@ test('smoke test', async ({ page }) => {
   await expect(page).toHaveTitle(/PairRank/)
   await expect( page.getByText('Compare what?') ).toBeVisible()  // JS-generated content
 })
+
+//TODO: need UI tests!
