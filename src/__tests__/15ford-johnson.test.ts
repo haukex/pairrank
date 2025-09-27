@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import { mergeInsertionGroupSizes, mergeInsertionMaxComparisons, mergeInsertionSort } from '../ford-johnson'
+import { makeMergeInsertionGroups, mergeInsertionGroupSizes, mergeInsertionMaxComparisons, mergeInsertionSort } from '../ford-johnson'
 import { Comparator, compareAllSort } from '../algorithm'
 import { test, expect } from '@playwright/test'
 import { makeSimpleComp } from './test-utils'
@@ -40,6 +40,10 @@ test('mergeInsertionGroupSizes', async () => {
   for (let i=0;i<exp.length;i++)
     got.push(gen.next().value)
   expect(got).toStrictEqual(exp)
+})
+
+test('makeMergeInsertionGroups', async () => {
+  expect( makeMergeInsertionGroups([3,4,5,6,7,8,9,10,11,12,21,22]) ).toStrictEqual([4,3,6,5,12,11,10,9,8,7,22,21])
 })
 
 test('mergeInsertionSort-permutations', async () => {

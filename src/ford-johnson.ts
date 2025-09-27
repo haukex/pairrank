@@ -32,6 +32,21 @@ export function* mergeInsertionGroupSizes() :Generator<number, never> {
   }
 }
 
+export function makeMergeInsertionGroups(items :number[]) :number[] {
+  const gen = mergeInsertionGroupSizes()
+  let i = 0
+  const rv :number[] = []
+  while (true) {
+    const curGroupSize = gen.next().value
+    const curGroup = items.slice(i, i+curGroupSize)
+    curGroup.reverse()
+    rv.push(...curGroup)
+    if (curGroup.length < curGroupSize) break
+    i += curGroupSize
+  }
+  return rv
+}
+
 /** Merge-Insertion Sort (Ford-Johnson) for strings with async comparison.
  *
  * @param items Array of strings to sort.
