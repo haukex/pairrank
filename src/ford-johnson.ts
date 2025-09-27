@@ -9,6 +9,18 @@
 import { Comparator } from './algorithm'
 import { assert } from './utils'
 
+export function mergeInsertionMaxComparisons(n :number) :number {
+  if (n<0) throw new Error('must specify zero or more items')
+  // formulas from https://en.wikipedia.org/wiki/Merge-insertion_sort (both of the following work)
+  /*let C = 0
+  for (let i=1; i<=n; i++)
+    C += Math.ceil(Math.log2((3*i)/4))
+  return C*/
+  return ( n*Math.ceil(Math.log2(3*n/4))
+    - Math.floor((2**Math.floor(Math.log2(6*n)))/3)
+    + Math.floor(Math.log2(6*n)/2) )
+}
+
 /** Merge-Insertion Sort (Ford-Johnson) for strings with async comparison.
  *
  * @param items Array of strings to sort.
