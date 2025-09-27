@@ -27,7 +27,7 @@ export function paranoia(condition: unknown, msg?: string): asserts condition {
  *
  * https://en.wikipedia.org/wiki/Heap%27s_algorithm
  */
-export function* permutations<T>(array :Readonly<T[]>): Generator<T[]> {
+export function* permutations<T>(array :Readonly<T[]>) :Generator<T[]> {
   const c :number[] = array.map(_=>0)
   const a = Array.from(array)
   yield* [Array.from(a)]

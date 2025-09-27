@@ -21,6 +21,17 @@ export function mergeInsertionMaxComparisons(n :number) :number {
     + Math.floor(Math.log2(6*n)/2) )
 }
 
+export function* mergeInsertionGroupSizes() :Generator<number, never> {
+  // "... the sums of sizes of every two adjacent groups form a sequence of powers of two."
+  // a(0) = 0 and if n>=1, a(n) = 2^n - a(n-1).
+  let prev = 0
+  for(let i=1; ; i++) {
+    const cur = 2**i - prev
+    yield cur
+    prev = cur
+  }
+}
+
 /** Merge-Insertion Sort (Ford-Johnson) for strings with async comparison.
  *
  * @param items Array of strings to sort.

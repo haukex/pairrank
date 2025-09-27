@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+import { mergeInsertionGroupSizes, mergeInsertionMaxComparisons, mergeInsertionSort } from '../ford-johnson'
 import { Comparator, compareAllSort } from '../algorithm'
-import { mergeInsertionMaxComparisons, mergeInsertionSort } from '../ford-johnson'
 import { test, expect } from '@playwright/test'
 import { makeSimpleComp } from './test-utils'
 import { permutations } from '../utils'
@@ -28,6 +28,18 @@ test('mergeInsertionMaxComparisons', async () => {
     166, 171, 177, 183, 189, 195, 201, 207, 213, 219, 225, 231, 237, 243, 249, 255]
   for (let i=0; i<exp.length; i++)
     expect( mergeInsertionMaxComparisons(i+1) ).toStrictEqual(exp[i])
+})
+
+test('mergeInsertionGroupSizes', async () => {
+  // https://oeis.org/A014113 "a(n) = a(n-1) + 2*a(n-2) with a(0)=0, a(1)=2." (skipping the initial zero)
+  const exp = [2, 2, 6, 10, 22, 42, 86, 170, 342, 682, 1366, 2730, 5462, 10922, 21846, 43690,
+    87382, 174762, 349526, 699050, 1398102, 2796202, 5592406, 11184810, 22369622, 44739242,
+    89478486, 178956970, 357913942, 715827882, 1431655766, 2863311530, 5726623062, 11453246122]
+  const got :number[] = []
+  const gen = mergeInsertionGroupSizes()
+  for (let i=0;i<exp.length;i++)
+    got.push(gen.next().value)
+  expect(got).toStrictEqual(exp)
 })
 
 test('mergeInsertionSort-permutations', async () => {
