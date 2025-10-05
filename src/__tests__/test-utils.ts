@@ -15,15 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import { Comparator } from '../algorithm'
+import { Comparator } from 'merge-insertion'
 
-export const failComp :Comparator = _ab => { throw new Error('I shouldn\'t be called in this test') }
+export const failComp :Comparator<string> = _ab => { throw new Error('I shouldn\'t be called in this test') }
 
-export function makeSimpleComp(items :string[]) :Comparator {
+export function makeSimpleComp(items :string[]) :Comparator<string> {
   return ([a,b]) => Promise.resolve( items.indexOf(a) > items.indexOf(b) ? 0 : 1 )
 }
 
-export function makeCustomComp(items :Record<string, 0|1>) :Comparator {
+export function makeCustomComp(items :Record<string, 0|1>) :Comparator<string> {
   const m = new Map(Object.entries(items))
   return ab => {
     const swap = ab[0] > ab[1]

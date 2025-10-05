@@ -22,39 +22,3 @@ export function assert(condition: unknown, msg?: string): asserts condition {
 /** Exactly the same as `assert`, but label paranoid checks as such (i.e. they could be removed someday) */
 export function paranoia(condition: unknown, msg?: string): asserts condition {
   if (!condition) throw new Error(msg) }
-
-/** Non-recursive version of Heap's algorithm
- *
- * https://en.wikipedia.org/wiki/Heap%27s_algorithm
- */
-export function* permutations<T>(array :Readonly<T[]>) :Generator<T[]> {
-  const c :number[] = array.map(_=>0)
-  const a = Array.from(array)
-  yield* [Array.from(a)]
-  let i = 1
-  while (i < a.length) {
-    const ci = c[i]
-    assert(ci!=undefined)
-    if (ci<i) {
-      const ai = a[i]
-      assert(ai!=undefined)
-      if (i%2===0) {
-        const a0 = a[0]
-        assert(a0!=undefined);
-        [a[0], a[i]] = [ai, a0]
-      }
-      else {
-        const aci = a[ci]
-        assert(aci!=undefined);
-        [a[ci], a[i]] = [ai, aci]
-      }
-      yield* [Array.from(a)]
-      c[i] = ci+1
-      i = 1
-    }
-    else {
-      c[i] = 0
-      i++
-    }
-  }
-}

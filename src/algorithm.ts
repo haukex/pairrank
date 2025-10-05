@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+import { Comparator } from 'merge-insertion'
 import { assert, paranoia } from './utils'
 
 /** An array of tuples of (item, score). Scores must be >=0 and there may not be duplicate items. */
@@ -67,11 +68,7 @@ export function findTieGroups(results :Readonly<RankedResults>) :[first_incl: nu
   return groups
 }
 
-/** A function to compare two items. Should not be called with the same item for both `a` and `b`.
- * Must return a Promise resolving to 0 if item `a` is ranked higher, or 1 if item `b` is ranked higher. */
-export type Comparator = (ab :Readonly<[a :string, b :string]>) => Promise<0|1>
-
-export async function compareAllSort(items :Readonly<string[]>, comparator :Comparator) :Promise<RankedResults> {
+export async function compareAllSort(items :Readonly<string[]>, comparator :Comparator<string>) :Promise<RankedResults> {
   if (new Set(items).size != items.length)
     throw new Error('No duplicates allowed in items to be ranked')
   const scores: Map<string, number> = new Map(items.map(e => [e, 0]))
@@ -92,7 +89,7 @@ export async function compareAllSort(items :Readonly<string[]>, comparator :Comp
   return results
 }
 
-export async function breakTies(results :Readonly<RankedResults>, comparator :Comparator) :Promise<RankedResults> {
+export async function breakTies(results :Readonly<RankedResults>, comparator :Comparator<string>) :Promise<RankedResults> {
   if (new Set(results.map(([s,])=>s)).size != results.length)
     throw new Error('No duplicates allowed in items to be ranked')
   const res :RankedResults = Array.from(results)

@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import { breakTies, Comparator, compareAllSort, findTieGroups, RankedResults, sortResults } from './algorithm'
+import { breakTies, compareAllSort, findTieGroups, RankedResults, sortResults } from './algorithm'
 import { jsx, safeCastElement } from './jsx-dom'
+import { Comparator } from 'merge-insertion'
 import { assert } from './utils'
 
 if (module.hot) module.hot.accept()  // for the parcel development environment
@@ -156,7 +157,7 @@ async function getItems(ctx :GlobalContext) :Promise<string[]> {
   })
 }
 
-function makeComparator(ctx :GlobalContext) :Comparator {
+function makeComparator(ctx :GlobalContext) :Comparator<string> {
   return ([a,b]) => {
     const btnA = safeCastElement(HTMLButtonElement, <button class="choice">{a}</button>)
     const btnB = safeCastElement(HTMLButtonElement, <button class="choice">{b}</button>)

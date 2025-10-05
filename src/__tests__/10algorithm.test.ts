@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import { normalizeScores, findTieGroups, Comparator, compareAllSort, breakTies } from '../algorithm'
+import { normalizeScores, findTieGroups, compareAllSort, breakTies } from '../algorithm'
 import { failComp, makeCustomComp, makeSimpleComp } from './test-utils'
 import { test, expect } from '@playwright/test'
+import { Comparator } from 'merge-insertion'
 
 test('normalizeScores', async () => {
   // function doesn't care about the strings, and sorts the array in place, so make a quick helper:
@@ -70,7 +71,7 @@ test('compareAllSort', async () => {
   // simple sort
   const baseComp = makeSimpleComp(['A','B','C','D'])
   let callCount = 0
-  const comp :Comparator = ab => { callCount++; return baseComp(ab) }
+  const comp :Comparator<string> = ab => { callCount++; return baseComp(ab) }
   expect( await compareAllSort([], comp) ).toStrictEqual([])
   expect( callCount ).toStrictEqual(0)
   expect( await compareAllSort(['B','A'], comp) ).toStrictEqual([ ['A',0], ['B',1] ])
@@ -91,7 +92,7 @@ test('compareAllSort', async () => {
   // Alice beats Bob, Carol beats Alice, Bob beats Carol
   const baseCompTie = makeCustomComp({'A\0B':0,'A\0C':1,'B\0C':0})
   callCount = 0
-  const compTie :Comparator = ab => { callCount++; return baseCompTie(ab) }
+  const compTie :Comparator<string> = ab => { callCount++; return baseCompTie(ab) }
   expect( await compareAllSort(['C','A','B'], compTie) )
     .toStrictEqual([ ['A',0], ['B',0], ['C',0] ])
   expect( callCount ).toStrictEqual(3)  // n!/(k!*(n-k)!) = 3
@@ -118,7 +119,7 @@ test('breakTies', async () => {
   expect( await breakTies([['X',0],['A',1],['B',1],['C',1],['Y',2]], comp) ).toStrictEqual([['X',0],['C',1],['B',2],['A',3],['Y',4]])
   expect( await breakTies([['X',3],['A',5],['B',5],['C',5],['Y',10]], comp) ).toStrictEqual([['X',3],['C',4],['B',5],['A',6],['Y',7]])
   let callCount = 0
-  const wrapComp :Comparator = ab => { callCount++; return comp(ab) }
+  const wrapComp :Comparator<string> = ab => { callCount++; return comp(ab) }
   expect( await breakTies([['A',0],['B',0],['X',1],['Y',2],['C',3],['D',3]], wrapComp) )
     .toStrictEqual([ ['B',0],['A',1],['X',2],['Y',3],['D',4],['C',5] ])
   expect( callCount ).toStrictEqual(2)

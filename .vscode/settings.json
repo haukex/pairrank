@@ -2,6 +2,7 @@
   "files.eol": "\n",
   "files.trimTrailingWhitespace": true,
   "editor.tabSize": 2,
+  "editor.rulers": [ 150 ],
   "eslint.validate": [
     "javascript",
     "typescript"
@@ -9,9 +10,7 @@
   "indentRainbow.ignoreErrorLanguages": [
     "markdown"
   ],
-  "cSpell.language": "en,en-US",
   "cSpell.words": [
-    "Hauke",
     "PairRank",
     "simpledotcss",
     "stylesheet"
