@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import { normalizeScores, findTieGroups, compareAllSort, breakTies } from '../algorithm'
+import { normalizeScores, findTieGroups, compareAllSort, breakTies, compareAllComparisons } from '../algorithm'
 import { failComp, makeCustomComp, makeSimpleComp } from './test-utils'
 import { test, expect } from '@playwright/test'
 import { Comparator } from 'merge-insertion'
@@ -65,6 +65,16 @@ test('scoreGroups', async () => {
   expect( findTieGroups([
     ['A',1],['B',2],['C',2],['D',3],['E',4],['F',4],['G',4],['H',5],['I',5],['J',5]
   ]) ).toStrictEqual([[1,3],[4,7],[7,10]])
+})
+
+test('compareAllComparisons', () => {
+  // <https://oeis.org/A161680>: a(n) = binomial(n,2)
+  /* Comparison to merge-insertion sort:
+   *            0, 0, 1, 3, 5,  7, 10, 13, 16, 19, 22, 26, 30, 34, 38,  42,  46,  50,  54,  58  */
+  const exp = [ 0, 0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78, 91, 105, 120, 136, 153, 171,
+    190, 210, 231, 253, 276, 300, 325, 351, 378, 406, 435, 465, 496, 528, 561, 595, 630, 666,
+    703, 741, 780, 820, 861, 903, 946, 990, 1035, 1081, 1128, 1176, 1225, 1275, 1326, 1378 ]
+  exp.forEach( (v,i) => expect( compareAllComparisons(i) ).toStrictEqual(v) )
 })
 
 test('compareAllSort', async () => {

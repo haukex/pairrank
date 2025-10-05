@@ -68,6 +68,15 @@ export function findTieGroups(results :Readonly<RankedResults>) :[first_incl: nu
   return groups
 }
 
+/** The number of comparisons that {@link compareAllSort} will perform. */
+export function compareAllComparisons(n :number) :number {
+  const factorial = (x :bigint) => {
+    let f = BigInt(1)
+    for (let i=BigInt(1);i<=x;i++) f*=i
+    return f }
+  return Number( factorial(BigInt(n)) / ( BigInt(2) * factorial(BigInt(n)-BigInt(2)) ) )
+}
+
 export async function compareAllSort(items :Readonly<string[]>, comparator :Comparator<string>) :Promise<RankedResults> {
   if (new Set(items).size != items.length)
     throw new Error('No duplicates allowed in items to be ranked')
