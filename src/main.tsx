@@ -106,7 +106,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 async function getItems(ctx :GlobalContext, initialItems :string[]) :Promise<[items :string[], mode :'thorough'|'efficient']> {
   const itemBox = safeCastElement(HTMLTextAreaElement,
     <textarea placeholder="Items to compare, one per line"></textarea>)
-  if (initialItems) itemBox.value = initialItems.join('\n')
+  itemBox.value = initialItems.join('\n')
   const boxNotice = safeCastElement(HTMLDivElement,
     <div class="notice notice-narrow d-none warning"></div>)
   const lblThoroughCount = safeCastElement(HTMLSpanElement, <span>0</span>)
