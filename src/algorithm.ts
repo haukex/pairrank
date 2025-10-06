@@ -77,20 +77,21 @@ export function compareAllComparisons(n :number) :number {
   return Number( factorial(BigInt(n)) / ( BigInt(2) * factorial(BigInt(n)-BigInt(2)) ) )
 }
 
-export async function compareAllSort(items :Readonly<string[]>, comparator :Comparator<string>) :Promise<RankedResults> {
+export function* combinations2<T>(items :ReadonlyArray<T>) :Generator<[T,T], void, undefined> {
+  for (let i = 0; i < items.length; i++)
+    for (let j = i+1; j < items.length; j++)
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      yield [items[i]!, items[j]!]
+}
+
+export async function compareAllSort(items :ReadonlyArray<string>, comparator :Comparator<string>) :Promise<RankedResults> {
   if (new Set(items).size != items.length)
     throw new Error('No duplicates allowed in items to be ranked')
   const scores: Map<string, number> = new Map(items.map(e => [e, 0]))
-  //TODO Later: A merge-insertion sort version to minimize comparisons, https://en.wikipedia.org/wiki/Merge-insertion_sort
-  for (let i = 0; i < items.length; i++) {
-    for (let j = i+1; j < items.length; j++) {
-      const a = items[i]
-      const b = items[j]
-      assert(a!=undefined && b!=undefined)
-      const c = await comparator([a,b]) ? b : a
-      const s = scores.get(c)
-      scores.set( c, s ? s + 1 : 1 )
-    }
+  for (const [a,b] of combinations2(items)) {
+    const c = await comparator([a,b]) ? b : a
+    const s = scores.get(c)
+    scores.set( c, s ? s + 1 : 1 )
   }
   const results = Array.from(scores)
   sortResults(results)

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import { normalizeScores, findTieGroups, compareAllSort, breakTies, compareAllComparisons } from '../algorithm'
+import { normalizeScores, findTieGroups, compareAllSort, breakTies, compareAllComparisons, combinations2 } from '../algorithm'
 import { failComp, makeCustomComp, makeSimpleComp } from './test-utils'
 import { test, expect } from '@playwright/test'
 import { Comparator } from 'merge-insertion'
@@ -65,6 +65,26 @@ test('scoreGroups', async () => {
   expect( findTieGroups([
     ['A',1],['B',2],['C',2],['D',3],['E',4],['F',4],['G',4],['H',5],['I',5],['J',5]
   ]) ).toStrictEqual([[1,3],[4,7],[7,10]])
+})
+
+test('combinations2', () => {
+  expect( Array.from(combinations2(['A','B'])) ).toStrictEqual([ ['A','B'] ])
+  expect( Array.from(combinations2(['A','B','C'])) ).toStrictEqual([
+    ['A','B'], ['A','C'], ['B','C'] ])
+  expect( Array.from(combinations2(['A','B','C','D'])) ).toStrictEqual([
+    ['A','B'], ['A','C'], ['A','D'], ['B','C'], ['B','D'], ['C','D'] ])
+  expect( Array.from(combinations2(['A','B','C','D','E'])) ).toStrictEqual([
+    ['A','B'], ['A','C'], ['A','D'], ['A','E'], ['B','C'], ['B','D'], ['B','E'], ['C','D'], ['C','E'], ['D','E'] ])
+  expect( Array.from(combinations2(['A','B','C','D','E','F'])) ).toStrictEqual([
+    ['A','B'], ['A','C'], ['A','D'], ['A','E'], ['A','F'], ['B','C'], ['B','D'], ['B','E'], ['B','F'], ['C','D'],
+    ['C','E'], ['C','F'], ['D','E'], ['D','F'], ['E','F'] ])
+  expect( Array.from(combinations2(['A','B','C','D','E','F','G'])) ).toStrictEqual([
+    ['A','B'], ['A','C'], ['A','D'], ['A','E'], ['A','F'], ['A','G'], ['B','C'], ['B','D'], ['B','E'], ['B','F'],
+    ['B','G'], ['C','D'], ['C','E'], ['C','F'], ['C','G'], ['D','E'], ['D','F'], ['D','G'], ['E','F'], ['E','G'], ['F','G'] ])
+  expect( Array.from(combinations2(['A','B','C','D','E','F','G','H'])) ).toStrictEqual([
+    ['A','B'], ['A','C'], ['A','D'], ['A','E'], ['A','F'], ['A','G'], ['A','H'], ['B','C'], ['B','D'], ['B','E'],
+    ['B','F'], ['B','G'], ['B','H'], ['C','D'], ['C','E'], ['C','F'], ['C','G'], ['C','H'], ['D','E'], ['D','F'],
+    ['D','G'], ['D','H'], ['E','F'], ['E','G'], ['E','H'], ['F','G'], ['F','H'], ['G','H'] ])
 })
 
 test('compareAllComparisons', () => {

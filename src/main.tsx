@@ -85,6 +85,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     unsavedChanges = false
     const items = await getItems(ctx)
     unsavedChanges = true
+    //TODO Later: A merge-insertion sort version to minimize comparisons
     let results = await compareAllSort(items, comp)
     displayResults(ctx, results)
     while (findTieGroups(results).length) {
