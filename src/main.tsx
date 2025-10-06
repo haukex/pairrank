@@ -40,7 +40,7 @@ class GlobalContext {
       // footer isn't sticky, so don't need this:
       //target.style.setProperty('scroll-margin-bottom', `${this.footer.getBoundingClientRect().height+5}px`)
       target.scrollIntoView({ block: 'center', behavior: 'auto' })
-    }, 1)  // I think this should ensure we fire after any other `setTimeout(..., 0)`s
+    }, 10)  // I think this should ensure we fire after any other `setTimeout(..., 0)`s
   }
   addSection(contents :HTMLElement, scrollTo :boolean = true) {
     const section = <section>{contents}</section>
@@ -105,7 +105,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 /** Prompt the user for a list of items to compare. */
 async function getItems(ctx :GlobalContext, initialItems :string[]) :Promise<[items :string[], mode :'thorough'|'efficient']> {
   const itemBox = safeCastElement(HTMLTextAreaElement,
-    <textarea placeholder="Items to compare, one per line" rows="5"></textarea>)
+    <textarea placeholder="Items to compare, one per line"></textarea>)
   if (initialItems) itemBox.value = initialItems.join('\n')
   const boxNotice = safeCastElement(HTMLDivElement,
     <div class="notice notice-narrow d-none warning"></div>)
@@ -119,6 +119,11 @@ async function getItems(ctx :GlobalContext, initialItems :string[]) :Promise<[it
   const boxParse = () => itemBox.value.split(/\r?\n/).map(s=>s.trim()).filter(s=>s.length)
 
   const boxChanged = () => {
+    // auto-size the text box
+    itemBox.style.setProperty('overflow-y', 'hidden')
+    itemBox.style.setProperty('height', '') // trick to allow shrinking
+    itemBox.style.setProperty('height', `max(5em, ${itemBox.scrollHeight}px)`)
+
     const items = boxParse()
     if (items.length<3) {
       boxNotice.innerText = '⚠️ Please enter at least three items.'
@@ -140,7 +145,7 @@ async function getItems(ctx :GlobalContext, initialItems :string[]) :Promise<[it
     lblThoroughCount.innerText = compareAllComparisons(items.length).toString()
     lblEfficientCount.innerText = mergeInsertionMaxComparisons(items.length).toString()
   }
-  boxChanged()
+  setTimeout(boxChanged)
   itemBox.addEventListener('input', boxChanged)
   itemBox.addEventListener('focusout', boxChanged)
 
