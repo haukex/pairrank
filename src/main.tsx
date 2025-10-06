@@ -85,9 +85,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   })
 
   const comp = makeComparator(ctx)
+  let startingItems :string[] = []
   while (true) {
     unsavedChanges = false
-    const [items,mode] = await getItems(ctx)
+    const [items,mode] = await getItems(ctx, startingItems)
     unsavedChanges = true
     let results = mode==='thorough' ? await compareAllSort(items, comp) : await mergeInsertionRank(items, comp)
     displayResults(ctx, results)
@@ -96,14 +97,16 @@ window.addEventListener('DOMContentLoaded', async () => {
       results = await breakTies(results, comp)
       displayResults(ctx, results)
     }
-    await askStartOver(ctx)
+    const startOver = await askStartOver(ctx)
+    startingItems = startOver==='clear' ? [] : items
   }
 })
 
 /** Prompt the user for a list of items to compare. */
-async function getItems(ctx :GlobalContext) :Promise<[items :string[], mode :'thorough'|'efficient']> {
+async function getItems(ctx :GlobalContext, initialItems :string[]) :Promise<[items :string[], mode :'thorough'|'efficient']> {
   const itemBox = safeCastElement(HTMLTextAreaElement,
     <textarea placeholder="Items to compare, one per line" rows="5"></textarea>)
+  if (initialItems) itemBox.value = initialItems.join('\n')
   const boxNotice = safeCastElement(HTMLDivElement,
     <div class="notice notice-narrow d-none warning"></div>)
   const lblThoroughCount = safeCastElement(HTMLSpanElement, <span>0</span>)
@@ -317,26 +320,39 @@ async function askBreakTies(ctx :GlobalContext, curSection :boolean = true) :Pro
   })
 }
 
-async function askStartOver(ctx :GlobalContext, curSection :boolean = true) :Promise<void> {
-  const btnStartOver = safeCastElement(HTMLButtonElement, <button class="btn-normal danger">🗑️ Reset and Start Over</button>)
-  const div = <div class="start-over">{btnStartOver}</div>
+async function askStartOver(ctx :GlobalContext, curSection :boolean = true) :Promise<'clear'|'start-over'> {
+  const btnStartOver = safeCastElement(HTMLButtonElement, <button class="btn-normal warning">🔁 Start Over</button>)
+  const btnClearAll = safeCastElement(HTMLButtonElement, <button class="btn-normal danger">🗑️ Clear All Data</button>)
+  const div = <div class="start-over">{btnClearAll} {btnStartOver}</div>
   if (curSection) ctx.addToCurrentSection(div); else ctx.addSection(div)
   const keyHandler = (event :KeyboardEvent) => {
     if (event.defaultPrevented) return
     if (event.metaKey || event.ctrlKey || event.altKey) return
-    if (event.key==='Escape') {
+    if (event.key==='Enter') {
       event.preventDefault()
       event.stopPropagation()
       btnStartOver.click()
     }
+    else if (event.key==='Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      btnClearAll.click()
+    }
   }
   window.addEventListener('keydown', keyHandler)
-  return new Promise<void>(resolve => {
-    btnStartOver.addEventListener('click', () => {
-      if (confirm('Are you sure you want to clear all data?')) {
+  return new Promise(resolve => {
+    btnStartOver.addEventListener('click', event => {
+      if (event.shiftKey || confirm('Are you sure you want to clear your choices and start over?')) {
         ctx.clearSections()
         window.removeEventListener('keydown', keyHandler)
-        resolve()
+        resolve('start-over')
+      }
+    })
+    btnClearAll.addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear ALL data?')) {
+        ctx.clearSections()
+        window.removeEventListener('keydown', keyHandler)
+        resolve('clear')
       }
     })
   })
