@@ -110,10 +110,10 @@ async function getItems(ctx :GlobalContext, initialItems :string[]) :Promise<[it
   const boxNotice = safeCastElement(HTMLDivElement,
     <div class="notice notice-narrow d-none warning"></div>)
   const lblThoroughCount = safeCastElement(HTMLSpanElement, <span>0</span>)
-  const btnThorough = safeCastElement(HTMLButtonElement, <button class="btn-normal primary"
+  const btnThorough = safeCastElement(HTMLButtonElement, <button class="btn-normal primary" title="Ctrl+Enter"
     disabled>🔀 <strong>Thorough</strong><br/><small>Compare every pair<br/>{lblThoroughCount} comparisons</small></button>)
   const lblEfficientCount = safeCastElement(HTMLSpanElement, <span>0</span>)
-  const btnEfficient = safeCastElement(HTMLButtonElement, <button class="btn-normal primary"
+  const btnEfficient = safeCastElement(HTMLButtonElement, <button class="btn-normal primary" title="Shift+Enter"
     disabled>🚀 <strong>Efficient</strong><br/><small>Fewer comparisons, no ties<br/>{lblEfficientCount} comparisons or less</small></button>)
 
   const boxParse = () => itemBox.value.split(/\r?\n/).map(s=>s.trim()).filter(s=>s.length)
@@ -146,10 +146,15 @@ async function getItems(ctx :GlobalContext, initialItems :string[]) :Promise<[it
 
   itemBox.addEventListener('keydown', event => {
     if (event.defaultPrevented) return
-    if (event.key === 'Enter' && (event.shiftKey || event.ctrlKey) && !btnEfficient.disabled) {
+    if (event.key === 'Enter' && event.shiftKey && !btnEfficient.disabled) {
       event.preventDefault()
       event.stopPropagation()
       btnEfficient.click()
+    }
+    else if (event.key === 'Enter' && event.ctrlKey && !btnThorough.disabled) {
+      event.preventDefault()
+      event.stopPropagation()
+      btnThorough.click()
     }
   })
 
