@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import { makeCustomComp, makeSimpleComp } from './test-utils'
+import { makeCustomComp, makeSimpleComp, testComp } from './test-utils'
 import { test, expect } from '@playwright/test'
 
 test('makeSimpleComp', async () => {
@@ -36,4 +36,18 @@ test('makeCustomComp', async () => {
   expect( await comp(['C','A']) ).toStrictEqual(0)
   expect( await comp(['B','C']) ).toStrictEqual(0)
   expect( await comp(['C','B']) ).toStrictEqual(1)
+})
+
+// Copied from https://github.com/haukex/merge-insertion.js/blob/37f490a3/src/__tests__/merge-insertion.test.ts#L241
+test('testComp', async () => {
+  const log :[string,string][] = []
+  const c = testComp(async _ab=>0, 2, log)
+  await c(['x','y'])
+  await c(['x','z'])
+  await expect( c(['x','x']) ).rejects.toThrow('may not be equal')
+  await expect( c(['y','x']) ).rejects.toThrow('duplicate comparison')
+  await expect( c(['x','y']) ).rejects.toThrow('duplicate comparison')
+  await expect( c(['x','z']) ).rejects.toThrow('duplicate comparison')
+  await expect( c(['i','j']) ).rejects.toThrow('too many')
+  expect(log).toStrictEqual([['x','y'],['x','z']])
 })

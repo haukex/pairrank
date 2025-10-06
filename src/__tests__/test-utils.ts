@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import { Comparator } from 'merge-insertion'
+import { Comparable, Comparator } from 'merge-insertion'
 
 export const failComp :Comparator<string> = _ab => { throw new Error('I shouldn\'t be called in this test') }
 
@@ -32,5 +32,24 @@ export function makeCustomComp(items :Record<string, 0|1>) :Comparator<string> {
     if (r!=undefined)
       return Promise.resolve(swap ? (r ? 0 : 1) : r)
     throw new Error(`Unhandled comparison a=${ab[0]} b=${ab[1]}`)
+  }
+}
+
+// Copied from https://github.com/haukex/merge-insertion.js/blob/37f490a3/src/__tests__/merge-insertion.test.ts#L223
+export function testComp<T extends Comparable>(c :Comparator<T>, maxCalls :number, log :[T,T][]|undefined = undefined) :Comparator<T> {
+  let callCount = 0
+  const pairMap :Map<T, Map<T, null>> = new Map()
+  return async ([a,b]) => {
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
+    if (a==b) throw new Error(`a and b may not be equal ('${a}')`)
+    if (pairMap.get(a)?.has(b) || pairMap.get(b)?.has(a))
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
+      throw new Error(`duplicate comparison of '${a}' and '${b}'`)
+    if (pairMap.has(a)) pairMap.get(a)?.set(b, null)
+    else pairMap.set(a, new Map([[b, null]]))
+    if (++callCount > maxCalls)
+      throw new Error(`too many Comparator calls (${callCount})`)
+    if (log!=undefined) log.push([a,b])
+    return await c([a,b])
   }
 }
