@@ -85,6 +85,9 @@ export function* combinations2<T>(items :ReadonlyArray<T>) :Generator<[T,T], voi
 }
 
 export async function compareAllSort(items :ReadonlyArray<string>, comparator :Comparator<string>) :Promise<RankedResults> {
+  if (items.length<1) return []
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  if (items.length===1) return [[items[0]!, 0]]
   if (new Set(items).size != items.length)
     throw new Error('No duplicates allowed in items to be ranked')
   const scores: Map<string, number> = new Map(items.map(e => [e, 0]))
