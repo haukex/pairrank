@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import { breakTies, compareAllSort, findTieGroups, RankedResults, sortResults } from './algorithm'
+import { breakTies, compareAllComparisons, compareAllSort, findTieGroups, RankedResults, sortResults } from './algorithm'
+import { Comparator, mergeInsertionMaxComparisons, mergeInsertionSort } from 'merge-insertion'
 import { jsx, safeCastElement } from './jsx-dom'
-import { Comparator } from 'merge-insertion'
 import { assert } from './utils'
 
 if (module.hot) module.hot.accept()  // for the parcel development environment
@@ -61,6 +61,10 @@ class GlobalContext {
   }
 }
 
+async function mergeInsertionRank(items :ReadonlyArray<string>, comp :Comparator<string>) :Promise<RankedResults> {
+  return ( await mergeInsertionSort(items, comp) ).map( (v,i) => [v,i] )
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   const htmlHeader = document.querySelector('header')
   const htmlMain = document.querySelector('main')
@@ -83,10 +87,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   const comp = makeComparator(ctx)
   while (true) {
     unsavedChanges = false
-    const items = await getItems(ctx)
+    const [items,mode] = await getItems(ctx)
     unsavedChanges = true
-    //TODO Later: A merge-insertion sort version to minimize comparisons
-    let results = await compareAllSort(items, comp)
+    let results = mode==='thorough' ? await compareAllSort(items, comp) : await mergeInsertionRank(items, comp)
     displayResults(ctx, results)
     while (findTieGroups(results).length) {
       if (!await askBreakTies(ctx)) break
@@ -98,12 +101,17 @@ window.addEventListener('DOMContentLoaded', async () => {
 })
 
 /** Prompt the user for a list of items to compare. */
-async function getItems(ctx :GlobalContext) :Promise<string[]> {
+async function getItems(ctx :GlobalContext) :Promise<[items :string[], mode :'thorough'|'efficient']> {
   const itemBox = safeCastElement(HTMLTextAreaElement,
     <textarea placeholder="Items to compare, one per line" rows="5"></textarea>)
   const boxNotice = safeCastElement(HTMLDivElement,
     <div class="notice notice-narrow d-none warning"></div>)
-  const btnStart = safeCastElement(HTMLButtonElement, <button class="btn-normal primary" disabled>🚀 Compare!</button>)
+  const lblThoroughCount = safeCastElement(HTMLSpanElement, <span>0</span>)
+  const btnThorough = safeCastElement(HTMLButtonElement, <button class="btn-normal primary"
+    disabled>🔀 <strong>Thorough</strong><br/><small>Compare every pair<br/>{lblThoroughCount} comparisons</small></button>)
+  const lblEfficientCount = safeCastElement(HTMLSpanElement, <span>0</span>)
+  const btnEfficient = safeCastElement(HTMLButtonElement, <button class="btn-normal primary"
+    disabled>🚀 <strong>Efficient</strong><br/><small>Fewer comparisons, no ties<br/>{lblEfficientCount} comparisons or less</small></button>)
 
   const boxParse = () => itemBox.value.split(/\r?\n/).map(s=>s.trim()).filter(s=>s.length)
 
@@ -112,17 +120,22 @@ async function getItems(ctx :GlobalContext) :Promise<string[]> {
     if (items.length<3) {
       boxNotice.innerText = '⚠️ Please enter at least three items.'
       boxNotice.classList.remove('d-none')
-      btnStart.disabled = true
+      btnThorough.disabled = true
+      btnEfficient.disabled = true
     }
     else if (new Set(items).size != items.length) {
       boxNotice.innerText = '⚠️ Please remove duplicates from the list.'
       boxNotice.classList.remove('d-none')
-      btnStart.disabled = true
+      btnThorough.disabled = true
+      btnEfficient.disabled = true
     }
     else {
       boxNotice.classList.add('d-none')
-      btnStart.disabled = false
+      btnThorough.disabled = false
+      btnEfficient.disabled = false
     }
+    lblThoroughCount.innerText = compareAllComparisons(items.length).toString()
+    lblEfficientCount.innerText = mergeInsertionMaxComparisons(items.length).toString()
   }
   boxChanged()
   itemBox.addEventListener('input', boxChanged)
@@ -130,31 +143,34 @@ async function getItems(ctx :GlobalContext) :Promise<string[]> {
 
   itemBox.addEventListener('keydown', event => {
     if (event.defaultPrevented) return
-    if (event.key === 'Enter' && (event.shiftKey || event.ctrlKey) && !btnStart.disabled) {
+    if (event.key === 'Enter' && (event.shiftKey || event.ctrlKey) && !btnEfficient.disabled) {
       event.preventDefault()
       event.stopPropagation()
-      btnStart.click()
+      btnEfficient.click()
     }
   })
 
   ctx.addSection(<article class="enter-choices">
     <h2>Compare what?</h2>
     {itemBox} {boxNotice}
-    <div>{btnStart}</div>
+    <div class="start-buttons">{btnThorough} {btnEfficient}</div>
   </article>)
   setTimeout(() => itemBox.focus(), 2)
 
-  return new Promise<string[]>(resolve => {
-    btnStart.addEventListener('click', () => {
+  return new Promise(resolve => {
+    const start = (mode :'thorough'|'efficient') => {
       setTimeout(() => {
         // I've had the experience that setting things disabled can mess with the other behavior, so defer that
         itemBox.readOnly = true
-        btnStart.disabled = true
+        btnThorough.disabled = true
+        btnEfficient.disabled = true
       }, 0)
       const items = boxParse()
       assert(items.length>2 && new Set(items).size===items.length)
-      resolve(items)
-    })
+      resolve([items, mode])
+    }
+    btnThorough.addEventListener('click', () => start('thorough'))
+    btnEfficient.addEventListener('click', () => start('efficient'))
   })
 }
 

@@ -128,6 +128,27 @@ header {
   z-index: 1000;
 }
 
+.start-buttons {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+.start-buttons > button {
+  width: calc(50% - 0.25rem);
+  min-width: fit-content;
+  margin-bottom: 0;
+}
+@media only screen and (max-width: 720px) {
+  .start-buttons {
+    flex-direction: column;
+  }
+  .start-buttons > button {
+    width: 100%;
+  }
+}
+
 .choices {
   display: flex;
   flex-direction: row;
