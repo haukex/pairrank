@@ -119,6 +119,12 @@ h3 { font-size: 1.4rem }
 button {
   padding: 0.5rem 1rem;
 }
+a.no-underline {
+  text-decoration: none;
+}
+a.no-underline:hover {
+  text-decoration: underline;
+}
 
 // custom elements
 header {
@@ -126,6 +132,15 @@ header {
   position: sticky;
   top: 0;
   z-index: 1000;
+}
+
+.box-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.box-title h2 {
+  flex-grow: 1;
 }
 
 .start-buttons {
@@ -193,9 +208,6 @@ header {
 }
 .results-title h2 {
   flex-grow: 1;
-}
-.copy-results {
-  font-size: 1rem;;
 }
 ol.results-list > li:first-child {
   font-weight: bold;

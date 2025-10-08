@@ -16,7 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 import { breakTies, compareAllComparisons, compareAllSort, findTieGroups, RankedResults, sortResults } from './algorithm'
-import { Comparator, mergeInsertionMaxComparisons, mergeInsertionSort } from 'merge-insertion'
+import { Comparator, fisherYates, mergeInsertionMaxComparisons, mergeInsertionSort } from 'merge-insertion'
 import { jsx, safeCastElement } from './jsx-dom'
 import { assert } from './utils'
 
@@ -109,14 +109,24 @@ async function getItems(ctx :GlobalContext, initialItems :string[]) :Promise<[it
   itemBox.value = initialItems.join('\n')
   const boxNotice = safeCastElement(HTMLDivElement,
     <div class="notice notice-narrow d-none warning"></div>)
+  const btnShuffle = safeCastElement(HTMLAnchorElement, <a class="no-underline" href="#"><small>🔀 Shuffle</small></a>)
   const lblThoroughCount = safeCastElement(HTMLSpanElement, <span>0</span>)
   const btnThorough = safeCastElement(HTMLButtonElement, <button class="btn-normal primary" title="Ctrl+Enter"
-    disabled>🔀 <strong>Thorough</strong><br/><small>Compare every pair<br/>{lblThoroughCount} comparisons</small></button>)
+    disabled>🧠 <strong>Thorough</strong><br/><small>Compare every combination<br/>{lblThoroughCount} comparisons</small></button>)
   const lblEfficientCount = safeCastElement(HTMLSpanElement, <span>0</span>)
   const btnEfficient = safeCastElement(HTMLButtonElement, <button class="btn-normal primary" title="Shift+Enter"
     disabled>🚀 <strong>Efficient</strong><br/><small>Fewer comparisons, no ties<br/>{lblEfficientCount} comparisons or less</small></button>)
 
   const boxParse = () => itemBox.value.split(/\r?\n/).map(s=>s.trim()).filter(s=>s.length)
+
+  let disableShuffle = false
+  btnShuffle.addEventListener('click', event => {
+    event.preventDefault()
+    if (disableShuffle) return
+    const items = boxParse()
+    fisherYates(items, function* () { while (true) yield* [Math.floor(Math.random()*items.length)] }())
+    itemBox.value = items.join('\n')
+  })
 
   const boxChanged = () => {
     // auto-size the text box
@@ -164,7 +174,7 @@ async function getItems(ctx :GlobalContext, initialItems :string[]) :Promise<[it
   })
 
   ctx.addSection(<article class="enter-choices">
-    <h2>Compare what?</h2>
+    <div class="box-title"> <h2>Compare what?</h2> {btnShuffle} </div>
     {itemBox} {boxNotice}
     <div class="start-buttons">{btnThorough} {btnEfficient}</div>
   </article>)
@@ -177,6 +187,7 @@ async function getItems(ctx :GlobalContext, initialItems :string[]) :Promise<[it
         itemBox.readOnly = true
         btnThorough.disabled = true
         btnEfficient.disabled = true
+        disableShuffle = true
       }, 0)
       const items = boxParse()
       assert(items.length>2 && new Set(items).size===items.length)
@@ -278,7 +289,7 @@ function displayResults(ctx :GlobalContext, results :RankedResults) {
   })
   scoreDone()
   const asHtml = htmlDoc.documentElement.outerHTML
-  const btnCopy = safeCastElement(HTMLAnchorElement, <a class="copy-results" href="#">📋 Copy</a>)
+  const btnCopy = safeCastElement(HTMLAnchorElement, <a class="no-underline" href="#"><small>📋 Copy</small></a>)
   btnCopy.addEventListener('click', async event => {
     event.preventDefault()
     const clipItems = [ new ClipboardItem({
