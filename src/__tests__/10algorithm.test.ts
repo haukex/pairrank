@@ -133,6 +133,13 @@ test('compareAllSort', async () => {
   expect( await compareAllSort(['C','B','A'], testComp(compTie, compareAllComparisons(3), log)) )
     .toStrictEqual([ ['A',0], ['B',0], ['C',0] ])
   expect( log.length ).toStrictEqual(12)
+
+  // 2x2-way tie
+  const compTie2 :Comparator<string> = makeCustomComp({'A\0B':0, 'A\0C':1, 'A\0D':0, 'B\0C':1, 'B\0D':0, 'C\0D':1})
+  log.length = 0
+  expect( await compareAllSort(['A','B','C','D'], testComp(compTie2, compareAllComparisons(4), log)) )
+    .toStrictEqual([ ['B',0], ['D',0], ['A',1], ['C',1] ])
+  expect( log.length ).toStrictEqual(6)
 })
 
 test('breakTies', async () => {
@@ -155,4 +162,9 @@ test('breakTies', async () => {
    * These scores are basically just helper values for sorting and identifying ties! */
   expect( await breakTies([['A',5],['B',5],['X',10],['Y',15],['C',20],['D',20]], comp) )
     .toStrictEqual([ ['B',0],['A',1],['X',2],['Y',7],['D',8],['C',9] ])
+
+  expect( await breakTies([ ['B',0], ['D',0], ['A',1], ['C',1] ], comp) )
+    .toStrictEqual([ ['D',0], ['B',1], ['C',2], ['A',3] ])
+  expect( await breakTies([ ['A',1], ['C',1], ['B',0], ['D',0] ], comp) )
+    .toStrictEqual([ ['D',0], ['B',1], ['C',2], ['A',3] ])
 })

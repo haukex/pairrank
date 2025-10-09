@@ -18,6 +18,8 @@
 import { Comparator } from 'merge-insertion'
 import { assert, paranoia } from './utils'
 
+const DEBUG :boolean = false
+
 /** An array of tuples of (item, score). Scores must be >=0 and there may not be duplicate items. */
 export type RankedResults = [item: string, score: number][]
 
@@ -90,15 +92,18 @@ export async function compareAllSort(items :ReadonlyArray<string>, comparator :C
   if (items.length===1) return [[items[0]!, 0]]
   if (new Set(items).size != items.length)
     throw new Error('No duplicates allowed in items to be ranked')
+  if (DEBUG) console.debug('compareAllSort',Array.from(items))
   const scores: Map<string, number> = new Map(items.map(e => [e, 0]))
   for (const [a,b] of combinations2(items)) {
     const c = await comparator([a,b]) ? b : a
+    if (DEBUG) console.debug('compare',a,b,'result',c)
     const s = scores.get(c)
     scores.set( c, s ? s + 1 : 1 )
   }
   const results = Array.from(scores)
   sortResults(results)
   normalizeScores(results)
+  if (DEBUG) console.debug('sort done',Array.from(results))
   return results
 }
 
@@ -106,9 +111,13 @@ export async function breakTies(results :Readonly<RankedResults>, comparator :Co
   if (new Set(results.map(([s,])=>s)).size != results.length)
     throw new Error('No duplicates allowed in items to be ranked')
   const res :RankedResults = Array.from(results)
-  await Promise.all( findTieGroups(res).map( async ([first,after]) => {
+  sortResults(res, 'asc')  // the following needs scores in ascending order
+  const groups = findTieGroups(res)
+  if (DEBUG) console.debug('breakTies on',Array.from(res),'groups',Array.from(groups))
+  for( const [first,after] of groups ) {
     // in this group, all the results are tied on their score, so force the user to re-evaluate
     const subRes = await compareAllSort(res.slice(first, after).map(([s,])=>s), comparator)
+    if (DEBUG) console.debug('first',first,'after',after,'subRes',Array.from(subRes))
     // splice the sub-results back into the array, adjusting the scores accordingly
     const baseScoreBefore :number = (() => {
       if (first<=0) return 0
@@ -116,6 +125,7 @@ export async function breakTies(results :Readonly<RankedResults>, comparator :Co
       assert(r!=undefined)
       return r[1]+1 })()
     paranoia(after>first && after-first===subRes.length)
+    if (DEBUG) console.debug('baseScoreBefore',baseScoreBefore)
     let gi :number = 0
     for( let ri=first; ri<after; ri++ ) {
       const r = res[ri]
@@ -125,18 +135,21 @@ export async function breakTies(results :Readonly<RankedResults>, comparator :Co
       r[1] = s[1] + baseScoreBefore
     }
     paranoia(gi===subRes.length)
+    if (DEBUG) console.debug('after splice',Array.from(res))
     // adjust the scores of all items following the spliced group (if any)
     if (after<results.length) {
       const sl = res[after-1]  // the last item spliced in
       const rr = res[after]    // the first item to adjust
       assert(sl!=undefined && rr!=undefined)
       const baseScoreAfter = sl[1] + 1 - rr[1]
+      if (DEBUG) console.debug('baseScoreAfter',baseScoreAfter,'from',after,'to',results.length-1)
       for( let ri=after; ri<results.length; ri++ ) {
         const r = res[ri]
         assert(r!=undefined)
         r[1] += baseScoreAfter
       }
+      if (DEBUG) console.debug('after adjust',Array.from(res))
     }
-  }))
+  }
   return res
 }

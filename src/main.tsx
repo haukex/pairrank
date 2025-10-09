@@ -20,6 +20,8 @@ import { Comparator, fisherYates, mergeInsertionMaxComparisons, mergeInsertionSo
 import { jsx, safeCastElement } from './jsx-dom'
 import { assert } from './utils'
 
+const DEBUG = false as boolean
+
 if (module.hot) module.hot.accept()  // for the parcel development environment
 
 window.addEventListener('error', event =>
@@ -91,6 +93,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const [items,mode] = await getItems(ctx, startingItems)
     unsavedChanges = true
     let results = mode==='thorough' ? await compareAllSort(items, comp) : await mergeInsertionRank(items, comp)
+    if (DEBUG) console.debug('rank',Array.from(items),'mode',mode,'results',Array.from(results))
     displayResults(ctx, results)
     while (findTieGroups(results).length) {
       if (!await askBreakTies(ctx)) break
@@ -240,6 +243,7 @@ function makeComparator(ctx :GlobalContext) :Comparator<string> {
 
 function displayResults(ctx :GlobalContext, results :RankedResults) {
   sortResults(results, 'desc')
+  if (DEBUG) console.debug('displayResults sorted',Array.from(results))
   const list = safeCastElement(HTMLOListElement, <ol class="results-list"></ol>)
   const htmlDoc = document.implementation.createHTMLDocument()
   htmlDoc.title = 'Results'
@@ -295,7 +299,7 @@ function displayResults(ctx :GlobalContext, results :RankedResults) {
     const clipItems = [ new ClipboardItem({
       'text/plain': new Blob([asText], { type: 'text/plain', endings: 'native' }),
       'text/html':  new Blob([asHtml], { type: 'text/html' }) }) ]
-    //console.debug(asHtml); console.debug(asText)
+    if (DEBUG) { console.debug(asHtml); console.debug(asText) }
     try { await navigator.clipboard.write(clipItems) }
     catch (ex) {
       console.warn(ex)
